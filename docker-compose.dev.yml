@@ -14,7 +14,7 @@ services:
     networks:
       - internal
     volumes:
-      - ./frontend:/app
+      - ./frontend/src:/app/src
 
   api:
     build:
