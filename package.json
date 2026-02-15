@@ -1,0 +1,9 @@
+{
+  "name": "PCBuilder",
+  "version": "0.1.0",
+  "scripts": {
+    "dev:up": "docker compose -f docker-compose.dev.yml up -d --build",
+    "dev:down": "docker compose -f docker-compose.dev.yml down"
+  }
+}
+
