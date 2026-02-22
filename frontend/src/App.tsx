@@ -4,12 +4,13 @@ import { Summary } from './components/Summary';
 import type { Build, PartInfo } from './types/types.d';
 import { useState } from 'react';
 import { CatalogModal } from './components/CatalogModal';
+import { BuildContext } from './context/buildContext';
 
 export const PARTS_DATA: PartInfo[] = [
     {
         type: 'CPU',
         label: 'Processador',
-        icon: <Cpu size={24} color="#3d3846" />,
+        icon: <Cpu size={24} />,
         category: 'ESSENTIAL',
         description: 'O cérebro do computador',
         components: [
@@ -134,7 +135,7 @@ export const PARTS_DATA: PartInfo[] = [
     {
         type: 'MOTHERBOARD',
         label: 'Placa-Mãe',
-        icon: <Box size={24} color="#3d3846" />,
+        icon: <Box size={24} />,
         category: 'ESSENTIAL',
         description: 'Conecta todos os componentes',
         components: [
@@ -219,7 +220,7 @@ export const PARTS_DATA: PartInfo[] = [
     {
         type: 'RAM',
         label: 'Memória RAM',
-        icon: <Zap size={24} color="#3d3846" />,
+        icon: <Zap size={24} />,
         category: 'ESSENTIAL',
         description: 'Memória de acesso rápido',
         components: [
@@ -298,7 +299,7 @@ export const PARTS_DATA: PartInfo[] = [
     {
         type: 'GPU',
         label: 'Placa de Vídeo',
-        icon: <Wallpaper size={24} color="#3d3846" />,
+        icon: <Wallpaper size={24} />,
         category: 'ESSENTIAL',
         description: 'Processa gráficos e jogos',
         components: [
@@ -412,7 +413,7 @@ export const PARTS_DATA: PartInfo[] = [
     {
         type: 'STORAGE',
         label: 'Armazenamento',
-        icon: <HardDrive size={24} color="#3d3846" />,
+        icon: <HardDrive size={24} />,
         category: 'ESSENTIAL',
         description: 'SSD ou HD para guardar arquivos',
         components: [
@@ -491,7 +492,7 @@ export const PARTS_DATA: PartInfo[] = [
     {
         type: 'PSU',
         label: 'Fonte',
-        icon: <Power size={24} color="#3d3846" />,
+        icon: <Power size={24} />,
         category: 'ESSENTIAL',
         description: 'Fornece energia para o sistema',
         components: [
@@ -565,89 +566,89 @@ export const PARTS_DATA: PartInfo[] = [
             }
         ]
     },
-    // {
-    //     type: 'CASE',
-    //     label: 'Gabinete',
-    //     icon: <Box size={24} color="#3d3846" />,
-    //     category: 'ESSENTIAL',
-    //     description: 'Abriga todos os componentes',
-    //     components: [
-    //         {
-    //             id: 'case-001',
-    //             name: 'Lian Li O11 Dynamic EVO',
-    //             partType: 'CASE',
-    //             brand: 'Lian Li',
-    //             imageUrl: 'https://images.kabum.com.br/produtos/fotos/284691/gabinete-gamer-lian-li-o11-dynamic-evo-mid-tower-atx-vidro-temperado-branco-o11dew_1657046054_g.jpg',
-    //             specs: {
-    //                 case: {
-    //                     formFactor: 'ATX',
-    //                     maxGPULength: 420,
-    //                     maxCoolerHeight: 167,
-    //                     maxPSULength: 225,
-    //                     includedFans: 0,
-    //                     maxFans: 13
-    //                 }
-    //             },
-    //             offers: [
-    //                 {
-    //                     id: 'case-001-kabum',
-    //                     price: 950,
-    //                     store: 'Kabum',
-    //                     url: 'https://kabum.com.br/produto/284691',
-    //                     inStock: true,
-    //                     lastUpdated: new Date()
-    //                 },
-    //                 {
-    //                     id: 'case-001-pichau',
-    //                     price: 920,
-    //                     store: 'Pichau',
-    //                     url: 'https://pichau.com.br/o11-dynamic-evo',
-    //                     inStock: true,
-    //                     lastUpdated: new Date()
-    //                 }
-    //             ]
-    //         },
-    //         {
-    //             id: 'case-002',
-    //             name: 'NZXT H510 Flow',
-    //             partType: 'CASE',
-    //             brand: 'NZXT',
-    //             imageUrl: 'https://images.kabum.com.br/produtos/fotos/368058/gabinete-gamer-nzxt-h510-flow-mid-tower-atx-lateral-em-vidro-preto-com-fundo-branco-ca-h52fw-01_1654716059_g.jpg',
-    //             specs: {
-    //                 case: {
-    //                     formFactor: 'ATX',
-    //                     maxGPULength: 381,
-    //                     maxCoolerHeight: 165,
-    //                     maxPSULength: 180,
-    //                     includedFans: 2,
-    //                     maxFans: 7
-    //                 }
-    //             },
-    //             offers: [
-    //                 {
-    //                     id: 'case-002-kabum',
-    //                     price: 599,
-    //                     store: 'Kabum',
-    //                     url: 'https://kabum.com.br/produto/368058',
-    //                     inStock: true,
-    //                     lastUpdated: new Date()
-    //                 },
-    //                 {
-    //                     id: 'case-002-pichau',
-    //                     price: 580,
-    //                     store: 'Pichau',
-    //                     url: 'https://pichau.com.br/h510-flow',
-    //                     inStock: true,
-    //                     lastUpdated: new Date()
-    //                 }
-    //             ]
-    //         }
-    //     ]
-    // },
+    {
+        type: 'CASE',
+        label: 'Gabinete',
+        icon: <Box size={24} />,
+        category: 'ESSENTIAL',
+        description: 'Abriga todos os componentes',
+        components: [
+            {
+                id: 'case-001',
+                name: 'Lian Li O11 Dynamic EVO',
+                partType: 'CASE',
+                brand: 'Lian Li',
+                imageUrl: 'https://images.kabum.com.br/produtos/fotos/284691/gabinete-gamer-lian-li-o11-dynamic-evo-mid-tower-atx-vidro-temperado-branco-o11dew_1657046054_g.jpg',
+                specs: {
+                    case: {
+                        formFactor: 'ATX',
+                        maxGPULength: 420,
+                        maxCoolerHeight: 167,
+                        maxPSULength: 225,
+                        includedFans: 0,
+                        maxFans: 13
+                    }
+                },
+                offers: [
+                    {
+                        id: 'case-001-kabum',
+                        price: 950,
+                        store: 'Kabum',
+                        url: 'https://kabum.com.br/produto/284691',
+                        inStock: true,
+                        lastUpdated: new Date()
+                    },
+                    {
+                        id: 'case-001-pichau',
+                        price: 920,
+                        store: 'Pichau',
+                        url: 'https://pichau.com.br/o11-dynamic-evo',
+                        inStock: true,
+                        lastUpdated: new Date()
+                    }
+                ]
+            },
+            {
+                id: 'case-002',
+                name: 'NZXT H510 Flow',
+                partType: 'CASE',
+                brand: 'NZXT',
+                imageUrl: 'https://images.kabum.com.br/produtos/fotos/368058/gabinete-gamer-nzxt-h510-flow-mid-tower-atx-lateral-em-vidro-preto-com-fundo-branco-ca-h52fw-01_1654716059_g.jpg',
+                specs: {
+                    case: {
+                        formFactor: 'ATX',
+                        maxGPULength: 381,
+                        maxCoolerHeight: 165,
+                        maxPSULength: 180,
+                        includedFans: 2,
+                        maxFans: 7
+                    }
+                },
+                offers: [
+                    {
+                        id: 'case-002-kabum',
+                        price: 599,
+                        store: 'Kabum',
+                        url: 'https://kabum.com.br/produto/368058',
+                        inStock: true,
+                        lastUpdated: new Date()
+                    },
+                    {
+                        id: 'case-002-pichau',
+                        price: 580,
+                        store: 'Pichau',
+                        url: 'https://pichau.com.br/h510-flow',
+                        inStock: true,
+                        lastUpdated: new Date()
+                    }
+                ]
+            }
+        ]
+    },
     // {
     //     type: 'COOLER',
     //     label: 'Cooler',
-    //     icon: <Snowflake size={24} color="#3d3846" />,
+    //     icon: <Snowflake size={24}  />,
     //     category: 'OPTIONAL',
     //     description: 'Resfriamento extra para CPU',
     //     components: [
@@ -795,37 +796,39 @@ function App() {
 
     return (
         <>
-            <nav className="fixed top-0 left-0 right-0 z-30 bg-background/95 backdrop-blur-md border-b">
-                <div className="container mx-auto px-4 md:px-8 py-4 flex items-center justify-between max-w-screen-2xl">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                            <Cpu size={20} color="#ffffff" />
-                        </div>
-                        <div>
-                            <h1 className="text-lg font-bold leading-none">PC Builder BR</h1>
-                            <p className="hidden sm:block text-[10px] text-muted-foreground font-medium">Monte seu PC ideal</p>
+            <BuildContext value={[build, setBuild]}>
+                <nav className="fixed top-0 left-0 right-0 z-30 bg-background/95 backdrop-blur-md border-b">
+                    <div className="container mx-auto px-4 md:px-8 py-4 flex items-center justify-between max-w-screen-2xl">
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                                <Cpu size={20} color="#ffffff" />
+                            </div>
+                            <div>
+                                <h1 className="text-lg font-bold leading-none">PC Builder BR</h1>
+                                <p className="hidden sm:block text-[10px] text-muted-foreground font-medium">Monte seu PC ideal</p>
+                            </div>
                         </div>
                     </div>
+                </nav>
+                <div className="w-full h-full p-8 pt-24 grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8 container px-4 md:px-8 py-8 mx-auto max-w-screen-2xl">
+                    <main className="flex flex-col gap-6" >
+                        <div className='mb-4'>
+                            <div className='flex gap-2'>
+                                <div className="h-8 w-2 bg-primary rounded-full"></div>
+                                <p className='text-3xl italic font-extrabold'>SIMULADOR DE MONTAGEM</p>
+                            </div>
+                            <p className='text-muted-foreground font-medium'>Confira seu setup com validação de montagem em tempo real</p>
+                        </div>
+                        <div className="flex flex-col gap-6">
+                            {PARTS_DATA.map((part: PartInfo) => <PartCard part={part} onSelect={(part: PartInfo) => setSelectedPart(part)} />)}
+                        </div>
+                    </main>
+                    <aside className="space-y-6">
+                        <Summary />
+                    </aside>
                 </div>
-            </nav>
-            <div className="w-full h-full p-8 pt-24 grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8 container px-4 md:px-8 py-8 mx-auto max-w-screen-2xl">
-                <main className="flex flex-col gap-6" >
-                    <div className='mb-4'>
-                        <div className='flex gap-2'>
-                            <div className="h-8 w-2 bg-primary rounded-full"></div>
-                            <p className='text-3xl italic font-extrabold'>SIMULADOR DE MONTAGEM</p>
-                        </div>
-                        <p className='text-muted-foreground font-medium'>Confira seu setup com validação de montagem em tempo real</p>
-                    </div>
-                    <div className="flex flex-col gap-6">
-                        {PARTS_DATA.map((part: PartInfo) => <PartCard part={part} onSelect={(part: PartInfo) => setSelectedPart(part)} />)}
-                    </div>
-                </main>
-                <aside className="space-y-6">
-                    <Summary />
-                </aside>
-            </div>
-            {selectedPart && <CatalogModal part={selectedPart} onClose={() => setSelectedPart(null)} />}
+                {selectedPart && <CatalogModal part={selectedPart} onClose={() => setSelectedPart(null)} />}
+            </BuildContext >
         </>
     )
 }
