@@ -1,8 +1,4 @@
-- Gamers montando primeiro PC (18-30 anos)
-- Entusiastas de hardware buscando upgrades
-- Pais comprando PC para filhos
-- Pequenas lojas de informática planejando builds para clientes
-- Comunidades BR: r/craftmybox, grupos Facebook/Discord de hardware
+# PCBuilderBR
 
 ## Funcionalidades Core
 
