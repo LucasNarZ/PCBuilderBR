@@ -2,7 +2,7 @@ from datetime import datetime
 from sqlalchemy import Column, DateTime, String, Float, Boolean, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
-from app.database import Base
+from app.core.database import Base
 
 class Component(Base):
     __tablename__ = "components"

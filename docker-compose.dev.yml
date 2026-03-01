@@ -31,6 +31,7 @@ services:
       - internal
     volumes:
       - ./backend:/app
+      - /app/.venv
 
   rabbitmq:
     image: rabbitmq:3-management

@@ -1,12 +1,19 @@
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 
-app = FastAPI()
+from app.core.database import engine
+from app.core.database import Base
+from app.routers import components
 
-@app.get("/")
-def root():
-    return {"message": "API funcionando 🚀"}
 
-@app.get("/health")
-def health():
-    return {"status": "ok"}
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    await engine.dispose()
 
+
+app = FastAPI(lifespan=lifespan)
+
+app.include_router(components.router, prefix="/api")

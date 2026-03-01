@@ -2,7 +2,6 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from alembic import context
 from app.database import Base
 from app.config import settings
-import app.models
 
 config = context.config
 target_metadata = Base.metadata
