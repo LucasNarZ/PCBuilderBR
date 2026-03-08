@@ -64,8 +64,8 @@
 - Opções dos produtos mais vendidos do mercado (MVP)
 - Soma de preços dos produtos escolhidos (MVP)
 - Analise de compatibilidade entre as peças (MVP)
+- Preços dos produtos nas principais lojas, atualizados a cada semana usando as APIs de cada loja(Kabum, Pichau e Amazon) (MVP)
 
-- Preços dos produtos nas principais lojas, atualizados a cada semana via Web Scraping (MVP)
 - Performance aproximada da config nos jogos mais famosos
 - Links para cada um dos produtos com as melhores ofertas
 - Historico de preços de cada produto em cada loja
@@ -74,6 +74,10 @@
 - Builds prontas recomendadas
 - Calculo de consumo para validar fonte de energia
 
+### Worker para atualização de preçofertas
+Todos os dias um worker irá usar as APIs das lojas para pegar os preços novos e atualizar no banco.
+As APIs não são públicas então um estudo sobre os endpoints é necessario.
+
 ### Stack
 - Frontend: React, react-hook-form-zod, axios, vite, tailwindCSS
-- Backend: FastAPI, RabbitMQ(async scraping job), Selenium, Docker, PostgreSQL, Pydantic
+- Backend: FastAPI, Docker, PostgreSQL, Pydantic, APIs das lojas de eletrônicos
