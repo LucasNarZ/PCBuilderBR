@@ -1,0 +1,1 @@
+from app.jobs.update_products_prices import update_products_prices
