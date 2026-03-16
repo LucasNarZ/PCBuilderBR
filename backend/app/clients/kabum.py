@@ -23,7 +23,12 @@ class KabumClient:
             image_url=images[0] if images else None,
         )
 
-    async def search(self, query: str) -> list[StoreProduct]:
+    def _is_relevant(self, query: str, product_name: str) -> bool:
+        query_words = query.lower().split()
+        product_lower = product_name.lower()
+        return all(word in product_lower for word in query_words)
+
+    async def search(self, query: str) -> list[StoreProduct] | None:
         params = {
             "query": query,
             "page_number": 1,
@@ -37,12 +42,16 @@ class KabumClient:
         }
         async with httpx.AsyncClient(headers=self._headers) as client:
             response = await client.get(f"{self.BASE_URL}/catalog/v2/search", params=params)
-            response.raise_for_status()
+
+            if response.status_code == 404:
+                return None
+
             data = response.json()
             return [
                 self._to_store_product(item)
                 for item in data.get("data", [])
                 if item.get("type") == "product"
+                and self._is_relevant(query, item.get("attributes", {}).get("title", ""))
             ]
 
     async def get_product(self, product_id: str) -> StoreProduct | None:
