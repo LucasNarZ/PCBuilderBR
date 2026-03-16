@@ -18,7 +18,11 @@ async def update_products_prices(
     results = await asyncio.gather(*searches)
 
     for component, store_products in zip(components, results):
+        if not store_products:
+            print(f"Component {component.name} not founded.")
+            continue
         for product in store_products:
+
             offer = ComponentOffer(
                 id=product.external_id,
                 component_id=component.id,
@@ -31,3 +35,16 @@ async def update_products_prices(
             await session.merge(offer)
 
     await session.commit()
+
+
+if __name__ == "__main__":
+    from app.core.database import AsyncSessionLocal
+
+    async def main():
+        async with AsyncSessionLocal() as session:
+            await update_products_prices(
+                session=session,
+                store_clients=StoreClients(),
+            )
+
+    asyncio.run(main())
