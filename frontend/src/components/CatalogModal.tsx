@@ -2,6 +2,8 @@ import { X } from "lucide-react";
 import type { Component, PartInfo } from "../types/types";
 import { SearchBar } from "./SearchBar";
 import { ComponentCard } from "./ComponentCard";
+import { useEffect, useState } from "react";
+import apiClient from "../lib/apiClient";
 
 interface CatalogModalProps {
     part: PartInfo;
@@ -9,6 +11,25 @@ interface CatalogModalProps {
 }
 
 export function CatalogModal({ part, onClose }: CatalogModalProps) {
+    const [components, setComponents] = useState<Component[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                setLoading(true)
+                const { data } = await apiClient.get<Component[]>("/components", {
+                    params: { part_type: part.type.toLowerCase() }
+                })
+                setComponents(data)
+            } catch (err) {
+                console.error(err)
+            } finally {
+                setLoading(false)
+            }
+        })()
+    }, [part.type]);
+
     return (
         <>
             <div className="fixed inset-0 bg-black/50 z-40" />
@@ -19,13 +40,16 @@ export function CatalogModal({ part, onClose }: CatalogModalProps) {
                 </div>
                 <SearchBar partName={part.label} />
                 <div className="flex flex-col gap-5 overflow-y-auto max-h-96">
-                    {part.components.map((component: Component) => <ComponentCard component={component} icon={part.icon} onClose={onClose} />)}
+                    {loading ? (
+                        <p className="text-sm text-muted-foreground text-center py-8">Carregando componentes...</p>
+                    ) : components.map((component: Component) => (
+                        <ComponentCard key={component.id} component={component} icon={part.icon} onClose={onClose} />
+                    ))}
                 </div>
                 <button className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground" onClick={onClose}>
                     <X />
                 </button>
-            </div >
+            </div>
         </>
-    )
-
+    );
 }

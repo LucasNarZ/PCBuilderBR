@@ -3,6 +3,7 @@ import { useContext, useState } from "react";
 import type { Component, ComponentOffer } from "../types/types";
 import { BuildContext } from "../context/buildContext";
 import { OfferCard } from "./OfferCard";
+import apiClient from "../lib/apiClient";
 
 interface ComponentCardProps {
     component: Component;
@@ -43,23 +44,34 @@ function getMainSpec(component: Component): string | null {
 export function ComponentCard({ component, icon, onClose }: ComponentCardProps) {
     const mainSpec = getMainSpec(component);
     const [offersOpen, setOffersOpen] = useState(false);
-    const sortedOffers = [...component.offers].sort((a, b) => a.price - b.price);
-    const cheapestOffer = sortedOffers[0];
+    const [offers, setOffers] = useState<ComponentOffer[]>([]);
+    const [loadingOffers, setLoadingOffers] = useState(false);
 
-    const [build, setBuild] = useContext(BuildContext)
+    const [build, setBuild] = useContext(BuildContext);
+
+    const toggleOffers = async () => {
+        if (!offersOpen && offers.length === 0) {
+            setLoadingOffers(true);
+            const { data } = await apiClient.get(`/components/${component.name}/offers`)
+            setOffers(data);
+            setLoadingOffers(false);
+        }
+        setOffersOpen(prev => !prev);
+    };
 
     const selectOffer = (offer: ComponentOffer) => {
-        const { offers, ...componentWithoutOffers } = component
-        const key = component.partType.toLowerCase() as keyof typeof build
+        console.log(component)
+        const { ...componentWithoutOffers } = component;
+        const key = component.partType.toLowerCase() as keyof typeof build;
         setBuild(prev => ({
             ...prev,
             [key]: {
                 ...componentWithoutOffers,
                 offer
             }
-        }))
+        }));
         onClose();
-    }
+    };
 
     return (
         <div className="p-4 bg-card rounded-xl border-2 border-border/40 hover:border-primary/50 transition-all group/item">
@@ -80,25 +92,28 @@ export function ComponentCard({ component, icon, onClose }: ComponentCardProps) 
                 <div className="text-right">
                     <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">Menor Preço</p>
                     <p className="font-black text-2xl text-primary leading-none tracking-tighter italic">
-                        {cheapestOffer ? `R$ ${cheapestOffer.price.toLocaleString('pt-BR')}` : '—'}
+                        {component.bestOffer?.price ? `R$ ${component.bestOffer.price.toLocaleString('pt-BR')}` : '—'}
                     </p>
                 </div>
             </div>
 
             <button
                 className="w-full flex items-center justify-between py-2 px-2 hover:bg-muted/50 rounded-lg text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors"
-                onClick={() => setOffersOpen(prev => !prev)}
+                onClick={toggleOffers}
             >
                 <div className="flex items-center gap-2">
                     <Store className="h-3 w-3" />
-                    Disponível em {component.offers.length} {component.offers.length === 1 ? 'loja' : 'lojas'}
+                    {loadingOffers
+                        ? 'Carregando ofertas...'
+                        : `Disponível em ${component.storeCount} ${offers.length === 1 ? 'loja' : 'lojas'}`
+                    }
                 </div>
                 <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${offersOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {offersOpen && (
                 <div className="mt-2 space-y-2">
-                    {sortedOffers.map((offer, idx) => (
+                    {offers.map((offer, idx) => (
                         <OfferCard key={offer.store} offer={offer} index={idx} onSelect={selectOffer} />
                     ))}
                 </div>
@@ -106,7 +121,8 @@ export function ComponentCard({ component, icon, onClose }: ComponentCardProps) 
 
             <button
                 className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground border border-primary-border hover-elevate active-elevate-2 px-4 py-2 w-full mt-4 h-12 font-black uppercase italic tracking-tighter transition-all"
-                onClick={() => selectOffer(cheapestOffer)}
+                onClick={() => selectOffer(component.bestOffer)}
+                disabled={!component.bestOffer}
             >
                 <Zap size={16} className="stroke-3" />
                 ESCOLHER MELHOR OFERTA
