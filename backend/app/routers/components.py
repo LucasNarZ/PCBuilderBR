@@ -3,7 +3,6 @@ from fastapi import APIRouter, Depends, Query
 from app.core.dependencies import get_component_service
 from app.services.components import ComponentService
 
-
 router = APIRouter(prefix="/components", tags=["components"])
 
 @router.get("/")
