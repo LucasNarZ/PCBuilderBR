@@ -1,4 +1,5 @@
 from typing import AsyncGenerator
+from app.services.compatibility import CompatibilityService
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.clients import StoreClients
@@ -13,5 +14,4 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 def get_component_service(session: AsyncSession = Depends(get_session)) -> ComponentService:
     return ComponentService(session)
 
-def get_store_clients():
-    return StoreClients()
+
