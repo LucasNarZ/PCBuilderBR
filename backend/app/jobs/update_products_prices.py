@@ -4,12 +4,12 @@ from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.clients import StoreClients
-from app.core.dependencies import get_session, get_store_clients
+from app.core.dependencies import get_session
 from app.models import Component, ComponentOffer
 
 async def update_products_prices(
     session: AsyncSession = Depends(get_session),
-    store_clients: StoreClients = Depends(get_store_clients),
+    store_clients: StoreClients = Depends(),
 ):
     result = await session.execute(select(Component))
     components = result.scalars().all()
