@@ -11,10 +11,10 @@ class CoolerCaseRule(CompatibilityRule):
         if not cooler:
             return errors
 
-        cooler_specs = cooler.cooler
+        cooler_specs = cooler.specs
 
         if case and cooler_specs.type == "AIR" and cooler_specs.height:
-            max_height = case.specs.case.max_cooler_height
+            max_height = case.specs.max_cooler_height
             if cooler_specs.height > max_height:
                 errors.append(CompatibilityError(
                     type="ERROR",

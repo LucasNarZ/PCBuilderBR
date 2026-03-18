@@ -29,7 +29,7 @@ class PSURule(CompatibilityRule):
                 type="ERROR",
                 message=f"Fonte ({psu_specs.wattage}W) insuficiente. Consumo estimado com margem de segurança: {recommended_wattage}W",
                 affected_components=["PSU", "CPU", "GPU"],
-                details=f"CPU: {cpu.specs.cpu.tdp if cpu else 0}W + GPU: {gpu.specs.tdp if gpu else 0}W + sistema: {SYSTEM_OVERHEAD_WATTS}W",
+                details=f"CPU: {cpu.specs.tdp if cpu else 0}W + GPU: {gpu.specs.tdp if gpu else 0}W + sistema: {SYSTEM_OVERHEAD_WATTS}W",
             ))
 
         if gpu:
