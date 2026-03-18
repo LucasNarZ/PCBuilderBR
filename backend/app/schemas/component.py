@@ -1,4 +1,4 @@
-from app.schemas.base import BaseSchema
+from .base import BaseSchema
 
 class ComponentOfferResponse(BaseSchema):
     id: str
