@@ -1,8 +1,6 @@
-from __future__ import annotations
-
 from datetime import datetime
 from enum import Enum
-from typing import Optional
+from typing import Generic, Optional, TypeVar
 
 from pydantic import BaseModel
 
@@ -91,6 +89,16 @@ class CompatibilityErrorType(str, Enum):
     ERROR = "ERROR"
     WARNING = "WARNING"
 
+
+class ComponentOffer(BaseModel):
+    id: str
+    price: float
+    store: str
+    url: str
+    in_stock: bool
+    last_updated: datetime
+
+
 class CPUSpecs(BaseModel):
     socket: Socket
     tdp: int
@@ -174,53 +182,44 @@ class MonitorSpecs(BaseModel):
     adaptive: AdaptiveSync
 
 
-class ComponentSpecs(BaseModel):
-    cpu: Optional[CPUSpecs] = None
-    motherboard: Optional[MotherboardSpecs] = None
-    ram: Optional[RAMSpecs] = None
-    gpu: Optional[GPUSpecs] = None
-    storage: Optional[StorageSpecs] = None
-    psu: Optional[PSUSpecs] = None
-    case: Optional[CaseSpecs] = None
-    cooler: Optional[CoolerSpecs] = None
-    monitor: Optional[MonitorSpecs] = None
+SpecT = TypeVar("SpecT")
 
 
-class Component(BaseModel):
+class Component(BaseModel, Generic[SpecT]):
     id: str
     name: str
     part_type: PartType
     brand: str
     image_url: Optional[str] = None
-    specs: ComponentSpecs
+    specs: SpecT
     store_count: int
     best_offer: ComponentOffer
 
 
-class ComponentWithChosenOffer(BaseModel):
+class ComponentWithChosenOffer(BaseModel, Generic[SpecT]):
     id: str
     name: str
     part_type: PartType
     brand: str
     image_url: Optional[str] = None
-    specs: ComponentSpecs
+    specs: SpecT
     store_count: int
     offer: ComponentOffer
 
 
 class BuildComponents(BaseModel):
-    cpu: Optional[ComponentWithChosenOffer] = None
-    motherboard: Optional[ComponentWithChosenOffer] = None
-    ram: Optional[ComponentWithChosenOffer] = None
-    gpu: Optional[ComponentWithChosenOffer] = None
-    storage: Optional[ComponentWithChosenOffer] = None
-    psu: Optional[ComponentWithChosenOffer] = None
-    case: Optional[ComponentWithChosenOffer] = None
-    cooler: Optional[ComponentWithChosenOffer] = None
-    monitor: Optional[ComponentWithChosenOffer] = None
-    keyboard: Optional[ComponentWithChosenOffer] = None
-    mouse: Optional[ComponentWithChosenOffer] = None
-    headset: Optional[ComponentWithChosenOffer] = None
+    cpu: Optional[ComponentWithChosenOffer[CPUSpecs]] = None
+    motherboard: Optional[ComponentWithChosenOffer[MotherboardSpecs]] = None
+    ram: Optional[ComponentWithChosenOffer[RAMSpecs]] = None
+    gpu: Optional[ComponentWithChosenOffer[GPUSpecs]] = None
+    storage: Optional[ComponentWithChosenOffer[StorageSpecs]] = None
+    psu: Optional[ComponentWithChosenOffer[PSUSpecs]] = None
+    case: Optional[ComponentWithChosenOffer[CaseSpecs]] = None
+    cooler: Optional[ComponentWithChosenOffer[CoolerSpecs]] = None
+    monitor: Optional[ComponentWithChosenOffer[MonitorSpecs]] = None
+    keyboard: Optional[ComponentWithChosenOffer[None]] = None
+    mouse: Optional[ComponentWithChosenOffer[None]] = None
+    headset: Optional[ComponentWithChosenOffer[None]] = None
 
 
 class Build(BaseModel):
