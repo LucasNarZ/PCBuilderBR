@@ -5,7 +5,7 @@ from app.jobs import update_products_prices
 
 from app.core.database import engine
 from app.core.database import Base
-from app.routers import components
+from app.routers import compatibility, components
 
 scheduler = AsyncIOScheduler()
 
@@ -23,3 +23,4 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan, docs_url="/docs", root_path="/api")
 
 app.include_router(components.router)
+app.include_router(compatibility.router)
