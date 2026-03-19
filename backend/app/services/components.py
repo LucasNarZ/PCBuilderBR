@@ -11,7 +11,7 @@ class ComponentService:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def list(self, part_type: str | None = None) -> list[ComponentResponse]:
+    async def list(self, part_type: str | None = None, search: str | None = None) -> list[ComponentResponse]:
         subquery = (
             select(
                 ComponentOffer.component_id,
@@ -33,8 +33,13 @@ class ComponentService:
             )
         )
 
-        if part_type:
-            query = query.where(Component.part_type == part_type)
+
+        if part_type and search:
+            query.where(Component.part_type == part_type, Component.name.ilike(f"%{search}%"))
+        elif part_type:
+            query.where(Component.part_type == part_type)
+        elif search:
+            query.where(Component.name.ilike(f"%{search}%"))
 
         result = await self.session.execute(query)
 
