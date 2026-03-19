@@ -39,11 +39,11 @@ class ComponentService:
         result = await self.session.execute(query)
 
         return [
-            {
+            ComponentResponse.model_validate({
                 **component.__dict__,
                 "storeCount": store_count or 0,
                 "bestOffer": offer
-            }
+            })
             for component, store_count, offer in result.all()
         ]
 
