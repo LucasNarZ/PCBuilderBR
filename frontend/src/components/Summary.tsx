@@ -2,25 +2,29 @@ import { CircleCheck, ExternalLink, X, CircleAlert } from "lucide-react";
 import { CompatibilityCheck } from "./CompatibilityCheck";
 import { useContext } from "react";
 import { BuildContext } from "../context/buildContext";
+import type { CompatibilityError } from "../types/types";
 
 const buildCompatibilityStatuses = {
     OK: { icon: CircleCheck, label: 'OK', className: 'whitespace-nowrap inline-flex items-center border px-2.5 py-0.5 text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover-elevate border-transparent text-primary-foreground shadow-xs bg-green-500 font-black italic tracking-tighter gap-1 rounded-sm' },
     ERROR: { icon: X, label: 'ERROR', className: 'whitespace-nowrap inline-flex items-center border px-2.5 py-0.5 text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover-elevate border-transparent text-primary-foreground shadow-xs bg-red-500 font-black italic tracking-tighter gap-1 rounded-sm' },
-    WARN: { icon: CircleAlert, label: 'WARN', className: 'whitespace-nowrap inline-flex items-center border px-2.5 py-0.5 text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover-elevate border-transparent text-primary-foreground shadow-xs bg-yellow-500 font-black italic tracking-tighter gap-1 rounded-sm' },
+    WARNING: { icon: CircleAlert, label: 'WARN', className: 'whitespace-nowrap inline-flex items-center border px-2.5 py-0.5 text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover-elevate border-transparent text-primary-foreground shadow-xs bg-yellow-500 font-black italic tracking-tighter gap-1 rounded-sm' },
 }
 
-export function Summary() {
+interface SummaryProps {
+    compatibilityErrors: CompatibilityError[];
+}
+
+export function Summary({ compatibilityErrors }: SummaryProps) {
     const [build, setBuild] = useContext(BuildContext)
 
-    const checks: Check[] = [
-        {
-            level: "CORRECT",
-            message: "nothing wrong"
-        }
-    ]
-    const compartibilityStatus: keyof typeof buildCompatibilityStatuses = "ERROR"
+    const priority = { ERROR: 2, WARNING: 1, OK: 0 } as const;
 
-    const status = buildCompatibilityStatuses[compartibilityStatus]
+    const compatibilityStatus = compatibilityErrors.reduce<keyof typeof buildCompatibilityStatuses>(
+        (acc, error) => (priority[error.type] > priority[acc] ? error.type : acc),
+        "OK"
+    );
+
+    const status = buildCompatibilityStatuses[compatibilityStatus]
     const StatusIcon = status.icon
 
 
@@ -45,7 +49,7 @@ export function Summary() {
                 <h1 className="text-5xl font-black text-primary tracking-tighter italic">R${totalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h1>
             </div>
             <div className="my-8">
-                {checks.map((check: Check) => <CompatibilityCheck {...check} />)}
+                {compatibilityErrors.map((compatibilityError: CompatibilityError) => <CompatibilityCheck compatibilityError={compatibilityError} />)}
             </div>
             <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover-elevate active-elevate-2 bg-primary text-primary-foreground border border-primary-border min-h-9 px-4 py-2 w-full h-16 text-lg font-black uppercase italic tracking-tighter rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all" onClick={openCompleteSetupLinks}>
                 COMPRAR SETUP COMPLETO
