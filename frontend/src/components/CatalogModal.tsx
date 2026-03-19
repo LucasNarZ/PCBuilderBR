@@ -19,7 +19,7 @@ export function CatalogModal({ part, onClose }: CatalogModalProps) {
             try {
                 setLoading(true)
                 const { data } = await apiClient.get<Component[]>("/components", {
-                    params: { part_type: part.type.toLowerCase() }
+                    params: { part_type: part.type }
                 })
                 setComponents(data)
             } catch (err) {
