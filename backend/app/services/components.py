@@ -71,4 +71,5 @@ class ComponentService:
             .join(subquery, (ComponentOffer.store == subquery.c.store) & (ComponentOffer.price == subquery.c.min_price))
             .where(Component.name == component_name)
         )
-        return result.scalars().all()
+
+        return [ComponentOfferResponse.model_validate(offer) for offer in result.scalars().all()]
