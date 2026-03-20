@@ -35,11 +35,11 @@ class ComponentService:
 
 
         if part_type and search:
-            query.where(Component.part_type == part_type, Component.name.ilike(f"%{search}%"))
+            query = query.where(Component.part_type == part_type, Component.name.ilike(f"%{search}%"))
         elif part_type:
-            query.where(Component.part_type == part_type)
+            query = query.where(Component.part_type == part_type)
         elif search:
-            query.where(Component.name.ilike(f"%{search}%"))
+            query = query.where(Component.name.ilike(f"%{search}%"))
 
         result = await self.session.execute(query)
 
