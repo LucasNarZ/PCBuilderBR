@@ -46,6 +46,8 @@ export function CatalogModal({ part, onClose }: CatalogModalProps) {
                 <div className="flex flex-col gap-5 overflow-y-auto max-h-96">
                     {loading ? (
                         <p className="text-sm text-muted-foreground text-center py-8">Carregando componentes...</p>
+                    ) : components.length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-8">Nenhum componente encontrado para "<span className="font-bold text-foreground">{searchTerm}</span>".</p>
                     ) : components.map((component: Component) => (
                         <ComponentCard key={component.id} component={component} icon={part.icon} onClose={onClose} />
                     ))}
