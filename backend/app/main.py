@@ -1,3 +1,4 @@
+from app.middlewares.logging import logging_middleware
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -21,6 +22,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan, docs_url="/docs", root_path="/api")
+
+app.middleware("http")(logging_middleware)
 
 app.include_router(components.router)
 app.include_router(compatibility.router)
