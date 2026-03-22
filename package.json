@@ -3,7 +3,19 @@
   "version": "0.1.0",
   "scripts": {
     "dev:up": "docker compose -f docker-compose.dev.yml up -d --build",
-    "dev:down": "docker compose -f docker-compose.dev.yml down"
+    "dev:down": "docker compose -f docker-compose.dev.yml down",
+    "dev:logs": "docker compose -f docker-compose.dev.yml logs -f",
+    "dev:restart": "docker compose -f docker-compose.dev.yml down && docker compose -f docker-compose.dev.yml up -d --build",
+    "dev:ps": "docker compose -f docker-compose.dev.yml ps",
+    "prod:up": "docker compose -f docker-compose.prod.yml up -d --build",
+    "prod:down": "docker compose -f docker-compose.prod.yml down",
+    "prod:logs": "docker compose -f docker-compose.prod.yml logs -f",
+    "prod:restart": "docker compose -f docker-compose.prod.yml down && docker compose -f docker-compose.prod.yml up -d --build",
+    "prod:ps": "docker compose -f docker-compose.prod.yml ps",
+    "stop:all": "docker stop $(docker ps -q)",
+    "logs:api": "docker compose -f docker-compose.dev.yml logs -f api",
+    "logs:frontend": "docker compose -f docker-compose.dev.yml logs -f front-end",
+    "logs:nginx": "docker compose -f docker-compose.dev.yml logs -f nginx"
   }
 }
 
