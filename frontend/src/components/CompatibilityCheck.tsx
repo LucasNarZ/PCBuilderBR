@@ -1,4 +1,4 @@
-import { CircleAlert, CircleCheck, CircleX } from "lucide-react";
+import { CircleAlert, CircleX } from "lucide-react";
 import type { CompatibilityError } from "../types/types";
 
 interface CompatibilityCheckProps {

@@ -15,7 +15,7 @@ interface SummaryProps {
 }
 
 export function Summary({ compatibilityErrors }: SummaryProps) {
-    const [build, setBuild] = useContext(BuildContext)
+    const [build] = useContext(BuildContext)
 
     const priority = { ERROR: 2, WARNING: 1, OK: 0 } as const;
 
