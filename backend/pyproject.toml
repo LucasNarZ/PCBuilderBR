@@ -8,6 +8,7 @@ dependencies = [
     "apscheduler>=3.11.2",
     "asyncpg>=0.31.0",
     "fastapi>=0.129.0",
+    "gunicorn>=25.1.0",
     "httpx>=0.28.1",
     "pip>=26.0.1",
     "pydantic>=2.12.5",
