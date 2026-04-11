@@ -11,9 +11,4 @@ git reset --hard origin/main
 
 docker compose -f "$COMPOSE_FILE" build
 docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
-
-cd backend
-source .venv/bin/activate
-uv sync
-alembic upgrade head
-
+docker compose -f "$COMPOSE_FILE" exec -T api alembic upgrade head
