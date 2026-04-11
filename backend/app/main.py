@@ -12,8 +12,6 @@ scheduler = AsyncIOScheduler()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
     scheduler.add_job(update_products_prices, "cron", hour=3, minute=0)
     scheduler.start()
     yield
