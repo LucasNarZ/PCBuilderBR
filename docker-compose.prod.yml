@@ -1,6 +1,5 @@
 networks:
   internal:
-    internal: true
   edge:
     external: true
     name: edge
