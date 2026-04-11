@@ -1,10 +1,7 @@
-from __future__ import annotations
-
 from datetime import datetime
 from enum import Enum
-from typing import Optional
-
-from pydantic import BaseModel
+from typing import Generic, Optional, TypeVar
+from .base import BaseSchema
 
 
 class PartType(str, Enum):
@@ -91,7 +88,16 @@ class CompatibilityErrorType(str, Enum):
     ERROR = "ERROR"
     WARNING = "WARNING"
 
-class CPUSpecs(BaseModel):
+
+class ComponentOffer(BaseSchema):
+    id: str
+    price: float
+    store: str
+    url: str
+    in_stock: bool
+
+
+class CPUSpecs(BaseSchema):
     socket: Socket
     tdp: int
     cores: int
@@ -101,7 +107,7 @@ class CPUSpecs(BaseModel):
     integrated_graphics: bool
 
 
-class MotherboardSpecs(BaseModel):
+class MotherboardSpecs(BaseSchema):
     socket: Socket
     chipset: str
     ram_type: RAMType
@@ -113,7 +119,7 @@ class MotherboardSpecs(BaseModel):
     form_factor: FormFactor
 
 
-class RAMSpecs(BaseModel):
+class RAMSpecs(BaseSchema):
     type: RAMType
     capacity: int
     speed: int
@@ -122,7 +128,7 @@ class RAMSpecs(BaseModel):
     voltage: float
 
 
-class GPUSpecs(BaseModel):
+class GPUSpecs(BaseSchema):
     chipset: str
     vram: int
     tdp: int
@@ -131,7 +137,7 @@ class GPUSpecs(BaseModel):
     recommended_psu: int
 
 
-class StorageSpecs(BaseModel):
+class StorageSpecs(BaseSchema):
     type: StorageType
     capacity: int
     read_speed: Optional[int] = None
@@ -140,7 +146,7 @@ class StorageSpecs(BaseModel):
     form_factor: str
 
 
-class PSUSpecs(BaseModel):
+class PSUSpecs(BaseSchema):
     wattage: int
     certification: PSUCertification
     modular: ModularType
@@ -148,7 +154,7 @@ class PSUSpecs(BaseModel):
     pcie_6pin: int
 
 
-class CaseSpecs(BaseModel):
+class CaseSpecs(BaseSchema):
     form_factor: FormFactor
     max_gpu_length: int
     max_cooler_height: int
@@ -157,7 +163,7 @@ class CaseSpecs(BaseModel):
     max_fans: int
 
 
-class CoolerSpecs(BaseModel):
+class CoolerSpecs(BaseSchema):
     type: CoolerType
     height: Optional[int] = None
     radiator_size: Optional[int] = None
@@ -165,7 +171,7 @@ class CoolerSpecs(BaseModel):
     compatible_sockets: list[Socket]
 
 
-class MonitorSpecs(BaseModel):
+class MonitorSpecs(BaseSchema):
     size: float
     resolution: str
     refresh_rate: int
@@ -174,56 +180,47 @@ class MonitorSpecs(BaseModel):
     adaptive: AdaptiveSync
 
 
-class ComponentSpecs(BaseModel):
-    cpu: Optional[CPUSpecs] = None
-    motherboard: Optional[MotherboardSpecs] = None
-    ram: Optional[RAMSpecs] = None
-    gpu: Optional[GPUSpecs] = None
-    storage: Optional[StorageSpecs] = None
-    psu: Optional[PSUSpecs] = None
-    case: Optional[CaseSpecs] = None
-    cooler: Optional[CoolerSpecs] = None
-    monitor: Optional[MonitorSpecs] = None
+SpecT = TypeVar("SpecT")
 
 
-class Component(BaseModel):
+class Component(BaseSchema, Generic[SpecT]):
     id: str
     name: str
     part_type: PartType
     brand: str
     image_url: Optional[str] = None
-    specs: ComponentSpecs
+    specs: SpecT
     store_count: int
     best_offer: ComponentOffer
 
 
-class ComponentWithChosenOffer(BaseModel):
+class ComponentWithChosenOffer(BaseSchema, Generic[SpecT]):
     id: str
     name: str
     part_type: PartType
     brand: str
     image_url: Optional[str] = None
-    specs: ComponentSpecs
+    specs: SpecT
     store_count: int
     offer: ComponentOffer
 
 
-class BuildComponents(BaseModel):
-    cpu: Optional[ComponentWithChosenOffer] = None
-    motherboard: Optional[ComponentWithChosenOffer] = None
-    ram: Optional[ComponentWithChosenOffer] = None
-    gpu: Optional[ComponentWithChosenOffer] = None
-    storage: Optional[ComponentWithChosenOffer] = None
-    psu: Optional[ComponentWithChosenOffer] = None
-    case: Optional[ComponentWithChosenOffer] = None
-    cooler: Optional[ComponentWithChosenOffer] = None
-    monitor: Optional[ComponentWithChosenOffer] = None
-    keyboard: Optional[ComponentWithChosenOffer] = None
-    mouse: Optional[ComponentWithChosenOffer] = None
-    headset: Optional[ComponentWithChosenOffer] = None
+class BuildComponents(BaseSchema):
+    cpu: Optional[ComponentWithChosenOffer[CPUSpecs]] = None
+    motherboard: Optional[ComponentWithChosenOffer[MotherboardSpecs]] = None
+    ram: Optional[ComponentWithChosenOffer[RAMSpecs]] = None
+    gpu: Optional[ComponentWithChosenOffer[GPUSpecs]] = None
+    storage: Optional[ComponentWithChosenOffer[StorageSpecs]] = None
+    psu: Optional[ComponentWithChosenOffer[PSUSpecs]] = None
+    case: Optional[ComponentWithChosenOffer[CaseSpecs]] = None
+    cooler: Optional[ComponentWithChosenOffer[CoolerSpecs]] = None
+    monitor: Optional[ComponentWithChosenOffer[MonitorSpecs]] = None
+    keyboard: Optional[ComponentWithChosenOffer[None]] = None
+    mouse: Optional[ComponentWithChosenOffer[None]] = None
+    headset: Optional[ComponentWithChosenOffer[None]] = None
 
 
-class Build(BaseModel):
+class Build(BaseSchema):
     id: str
     name: Optional[str] = None
     components: BuildComponents
@@ -231,21 +228,21 @@ class Build(BaseModel):
     updated_at: datetime
 
 
-class CompatibilityError(BaseModel):
+class CompatibilityError(BaseSchema):
     type: CompatibilityErrorType
     message: str
     affected_components: list[PartType]
     details: Optional[str] = None
 
 
-class EstimatedPerformance(BaseModel):
+class EstimatedPerformance(BaseSchema):
     game: str
     avg_fps: float
     resolution: str
     settings: str
 
 
-class BuildValidation(BaseModel):
+class BuildValidation(BaseSchema):
     is_valid: bool
     errors: list[CompatibilityError]
     warnings: list[CompatibilityError]
@@ -254,7 +251,7 @@ class BuildValidation(BaseModel):
     estimated_performance: Optional[list[EstimatedPerformance]] = None
 
 
-class PartInfo(BaseModel):
+class PartInfo(BaseSchema):
     type: PartType
     label: str
     icon: str

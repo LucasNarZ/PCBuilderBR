@@ -54,17 +54,17 @@ export type ComponentWithChosenOffer = Omit<Component, "offers"> & {
     offer: ComponentOffer;
 };
 
-export interface ComponentSpecs {
-    cpu?: CPUSpecs;
-    motherboard?: MotherboardSpecs;
-    ram?: RAMSpecs;
-    gpu?: GPUSpecs;
-    storage?: StorageSpecs;
-    psu?: PSUSpecs;
-    case?: CaseSpecs;
-    cooler?: CoolerSpecs;
-    monitor?: MonitorSpecs;
-}
+export type ComponentSpecs =
+    | CPUSpecs
+    | MotherboardSpecs
+    | RAMSpecs
+    | GPUSpecs
+    | StorageSpecs
+    | PSUSpecs
+    | CaseSpecs
+    | CoolerSpecs
+    | MonitorSpecs
+    | null;
 
 export interface CPUSpecs {
     socket: Socket;

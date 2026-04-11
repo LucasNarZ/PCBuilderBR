@@ -1,0 +1,66 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+permissions:
+  contents: none
+
+jobs:
+  deploy:
+    name: Build and deploy on VPS
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: production
+
+    steps:
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Configure known hosts
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Sync production environment file
+        shell: bash
+        run: |
+          ssh \
+            -o BatchMode=yes \
+            -o ConnectTimeout=30 \
+            -o ServerAliveInterval=60 \
+            -o StrictHostKeyChecking=yes \
+            "${{ vars.DEPLOY_USER }}@${{ vars.DEPLOY_HOST }}" \
+            "mkdir -p '${{ vars.DEPLOY_PATH }}' && umask 077 && cat > '${{ vars.DEPLOY_PATH }}/.env'" <<EOF
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB=${{ vars.POSTGRES_DB }}
+          PROXY_UPSTREAM_NAME=${{ vars.PROXY_UPSTREAM_NAME }}
+          EOF
+
+      - name: Deploy on VPS
+        uses: nick-invision/retry@v3
+        with:
+          timeout_minutes: 15
+          max_attempts: 3
+          retry_wait_seconds: 20
+          command: >-
+            ssh
+            -o BatchMode=yes
+            -o ConnectTimeout=30
+            -o ServerAliveInterval=60
+            -o StrictHostKeyChecking=yes
+            "${{ vars.DEPLOY_USER }}@${{ vars.DEPLOY_HOST }}"
+            "chmod +x '${{ vars.DEPLOY_PATH }}/scripts/deploy.sh' && DEPLOY_PATH='${{ vars.DEPLOY_PATH }}' '${{ vars.DEPLOY_PATH }}/scripts/deploy.sh'"

@@ -33,21 +33,6 @@ services:
       - ./backend:/app
       - /app/.venv
 
-  rabbitmq:
-    image: rabbitmq:3-management
-    restart: unless-stopped
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    networks:
-      - internal
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
 
   postgres:
     image: postgres:16.3
@@ -72,11 +57,44 @@ services:
     depends_on:
       - api
       - front-end
+      - grafana
     ports:
       - "80:80"
       - "443:443"
     networks:
       - public
+      - internal
+
+  loki:
+    image: grafana/loki:2.9.0
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki_data:/loki
+    networks:
+      - internal
+
+  promtail:
+    image: grafana/promtail:3.5.9
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./infra/promtail-config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - internal
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    environment:
+      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    volumes:
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning
+      - grafana_data:/var/lib/grafana
+    networks:
       - internal
 
   pgadmin:
@@ -93,3 +111,5 @@ services:
 volumes:
   postgres:
   rabbitmq_data:
+  loki_data:
+  grafana_data:

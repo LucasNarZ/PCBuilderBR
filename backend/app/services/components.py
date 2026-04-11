@@ -11,7 +11,7 @@ class ComponentService:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def list(self, part_type: str | None = None) -> list[ComponentResponse]:
+    async def list(self, part_type: str | None = None, search: str | None = None) -> list[ComponentResponse]:
         subquery = (
             select(
                 ComponentOffer.component_id,
@@ -33,17 +33,22 @@ class ComponentService:
             )
         )
 
-        if part_type:
+
+        if part_type and search:
+            query = query.where(Component.part_type == part_type, Component.name.ilike(f"%{search}%"))
+        elif part_type:
             query = query.where(Component.part_type == part_type)
+        elif search:
+            query = query.where(Component.name.ilike(f"%{search}%"))
 
         result = await self.session.execute(query)
 
         return [
-            {
+            ComponentResponse.model_validate({
                 **component.__dict__,
                 "storeCount": store_count or 0,
                 "bestOffer": offer
-            }
+            })
             for component, store_count, offer in result.all()
         ]
 
@@ -66,4 +71,5 @@ class ComponentService:
             .join(subquery, (ComponentOffer.store == subquery.c.store) & (ComponentOffer.price == subquery.c.min_price))
             .where(Component.name == component_name)
         )
-        return result.scalars().all()
+
+        return [ComponentOfferResponse.model_validate(offer) for offer in result.scalars().all()]

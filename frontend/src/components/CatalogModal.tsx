@@ -14,12 +14,16 @@ export function CatalogModal({ part, onClose }: CatalogModalProps) {
     const [components, setComponents] = useState<Component[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const [searchTerm, setSearchTerm] = useState<string>("")
+
     useEffect(() => {
         (async () => {
             try {
                 setLoading(true)
                 const { data } = await apiClient.get<Component[]>("/components", {
-                    params: { part_type: part.type.toLowerCase() }
+                    params: {
+                        part_type: part.type, search: searchTerm.trim() || undefined
+                    }
                 })
                 setComponents(data)
             } catch (err) {
@@ -28,7 +32,7 @@ export function CatalogModal({ part, onClose }: CatalogModalProps) {
                 setLoading(false)
             }
         })()
-    }, [part.type]);
+    }, [part.type, searchTerm]);
 
     return (
         <>
@@ -38,10 +42,12 @@ export function CatalogModal({ part, onClose }: CatalogModalProps) {
                     <h2 className="text-2xl font-black italic uppercase tracking-tighter">Catálogo de {part.label}</h2>
                     <p className="text-sm font-medium text-muted-foreground">Compare preços entre lojas nacionais e selecione o melhor hardware.</p>
                 </div>
-                <SearchBar partName={part.label} />
+                <SearchBar partName={part.label} onSearch={(term) => setSearchTerm(term)} />
                 <div className="flex flex-col gap-5 overflow-y-auto max-h-96">
                     {loading ? (
                         <p className="text-sm text-muted-foreground text-center py-8">Carregando componentes...</p>
+                    ) : components.length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-8">Nenhum componente encontrado para "<span className="font-bold text-foreground">{searchTerm}</span>".</p>
                     ) : components.map((component: Component) => (
                         <ComponentCard key={component.id} component={component} icon={part.icon} onClose={onClose} />
                     ))}

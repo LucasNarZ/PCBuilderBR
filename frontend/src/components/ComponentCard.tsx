@@ -1,6 +1,6 @@
 import { ChevronDown, Store, Zap } from "lucide-react";
 import { useContext, useState } from "react";
-import type { Component, ComponentOffer } from "../types/types";
+import type { Component, ComponentOffer, CPUSpecs, MotherboardSpecs, RAMSpecs, GPUSpecs, StorageSpecs, PSUSpecs, CaseSpecs, CoolerSpecs, MonitorSpecs } from "../types/types";
 import { BuildContext } from "../context/buildContext";
 import { OfferCard } from "./OfferCard";
 import apiClient from "../lib/apiClient";
@@ -14,24 +14,42 @@ interface ComponentCardProps {
 function getMainSpec(component: Component): string | null {
     const { partType, specs } = component;
     switch (partType) {
-        case 'CPU':
-            return specs.cpu ? `${specs.cpu.cores}C/${specs.cpu.threads}T · ${specs.cpu.socket}` : null;
-        case 'MOTHERBOARD':
-            return specs.motherboard ? `${specs.motherboard.socket} · ${specs.motherboard.chipset}` : null;
-        case 'RAM':
-            return specs.ram ? `${specs.ram.capacity}GB ${specs.ram.type} ${specs.ram.speed}MHz` : null;
-        case 'GPU':
-            return specs.gpu ? `${specs.gpu.vram}GB VRAM · ${specs.gpu.chipset}` : null;
-        case 'STORAGE':
-            return specs.storage ? `${specs.storage.capacity}GB ${specs.storage.type}` : null;
-        case 'PSU':
-            return specs.psu ? `${specs.psu.wattage}W · ${specs.psu.certification.replace(/_/g, ' ')}` : null;
-        case 'CASE':
-            return specs.case ? `${specs.case.formFactor} · GPU até ${specs.case.maxGPULength}mm` : null;
-        case 'COOLER':
-            return specs.cooler ? `${specs.cooler.type} · ${specs.cooler.tdpRating}W TDP` : null;
-        case 'MONITOR':
-            return specs.monitor ? `${specs.monitor.size}" ${specs.monitor.resolution} ${specs.monitor.refreshRate}Hz` : null;
+        case 'CPU': {
+            const s = specs as CPUSpecs;
+            return `${s.cores}C/${s.threads}T · ${s.socket}`;
+        }
+        case 'MOTHERBOARD': {
+            const s = specs as MotherboardSpecs;
+            return `${s.socket} · ${s.chipset}`;
+        }
+        case 'RAM': {
+            const s = specs as RAMSpecs;
+            return `${s.capacity}GB ${s.type} ${s.speed}MHz`;
+        }
+        case 'GPU': {
+            const s = specs as GPUSpecs;
+            return `${s.vram}GB VRAM · ${s.chipset}`;
+        }
+        case 'STORAGE': {
+            const s = specs as StorageSpecs;
+            return `${s.capacity}GB ${s.type}`;
+        }
+        case 'PSU': {
+            const s = specs as PSUSpecs;
+            return `${s.wattage}W · ${s.certification.replace(/_/g, ' ')}`;
+        }
+        case 'CASE': {
+            const s = specs as CaseSpecs;
+            return `${s.formFactor} · GPU até ${s.maxGPULength}mm`;
+        }
+        case 'COOLER': {
+            const s = specs as CoolerSpecs;
+            return `${s.type} · ${s.tdpRating}W TDP`;
+        }
+        case 'MONITOR': {
+            const s = specs as MonitorSpecs;
+            return `${s.size}" ${s.resolution} ${s.refreshRate}Hz`;
+        }
         case 'KEYBOARD':
         case 'MOUSE':
         case 'HEADSET':
@@ -46,13 +64,12 @@ export function ComponentCard({ component, icon, onClose }: ComponentCardProps) 
     const [offersOpen, setOffersOpen] = useState(false);
     const [offers, setOffers] = useState<ComponentOffer[]>([]);
     const [loadingOffers, setLoadingOffers] = useState(false);
-
     const [build, setBuild] = useContext(BuildContext);
 
     const toggleOffers = async () => {
         if (!offersOpen && offers.length === 0) {
             setLoadingOffers(true);
-            const { data } = await apiClient.get(`/components/${component.name}/offers`)
+            const { data } = await apiClient.get(`/components/${component.name}/offers`);
             setOffers(data);
             setLoadingOffers(false);
         }
@@ -60,15 +77,10 @@ export function ComponentCard({ component, icon, onClose }: ComponentCardProps) 
     };
 
     const selectOffer = (offer: ComponentOffer) => {
-        console.log(component)
-        const { ...componentWithoutOffers } = component;
         const key = component.partType.toLowerCase() as keyof typeof build;
         setBuild(prev => ({
             ...prev,
-            [key]: {
-                ...componentWithoutOffers,
-                offer
-            }
+            [key]: { ...component, offer }
         }));
         onClose();
     };
@@ -96,7 +108,6 @@ export function ComponentCard({ component, icon, onClose }: ComponentCardProps) 
                     </p>
                 </div>
             </div>
-
             <button
                 className="w-full flex items-center justify-between py-2 px-2 hover:bg-muted/50 rounded-lg text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors"
                 onClick={toggleOffers}
@@ -110,15 +121,13 @@ export function ComponentCard({ component, icon, onClose }: ComponentCardProps) 
                 </div>
                 <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${offersOpen ? 'rotate-180' : ''}`} />
             </button>
-
             {offersOpen && (
                 <div className="mt-2 space-y-2">
-                    {offers.map((offer, idx) => (
-                        <OfferCard key={offer.store} offer={offer} index={idx} onSelect={selectOffer} />
+                    {offers.map((offer) => (
+                        <OfferCard key={offer.store} offer={offer} index={0} onSelect={selectOffer} />
                     ))}
                 </div>
             )}
-
             <button
                 className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground border border-primary-border hover-elevate active-elevate-2 px-4 py-2 w-full mt-4 h-12 font-black uppercase italic tracking-tighter transition-all"
                 onClick={() => selectOffer(component.bestOffer)}

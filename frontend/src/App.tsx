@@ -1,10 +1,11 @@
 import { Box, Cpu, HardDrive, Power, Wallpaper, Zap } from 'lucide-react';
 import { PartCard } from './components/PartCard';
 import { Summary } from './components/Summary';
-import type { Build, PartInfo } from './types/types.d';
-import { useState } from 'react';
+import type { Build, CompatibilityError, PartInfo } from './types/types.d';
+import { useEffect, useState } from 'react';
 import { CatalogModal } from './components/CatalogModal';
 import { BuildContext } from './context/buildContext';
+import apiClient from './lib/apiClient';
 
 export const PARTS_DATA: PartInfo[] = [
     {
@@ -61,6 +62,16 @@ export const PARTS_DATA: PartInfo[] = [
 function App() {
     const [selectedPart, setSelectedPart] = useState<PartInfo | null>(null)
     const [build, setBuild] = useState<Partial<Build['components']>>({})
+    const [compatibilityErrors, setCompatibilityErrors] = useState<CompatibilityError[]>([])
+
+    useEffect(() => {
+        (async () => {
+            const { data } = await apiClient.post("/compatibility", build)
+            console.log(data)
+
+            setCompatibilityErrors([...data.errors, ...data.warnings])
+        })()
+    }, [build])
 
     return (
         <>
@@ -92,7 +103,7 @@ function App() {
                         </div>
                     </main>
                     <aside className="space-y-6">
-                        <Summary />
+                        <Summary compatibilityErrors={compatibilityErrors} />
                     </aside>
                 </div>
                 {selectedPart && <CatalogModal part={selectedPart} onClose={() => setSelectedPart(null)} />}
