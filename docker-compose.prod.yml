@@ -21,6 +21,17 @@ services:
           - ${PROXY_UPSTREAM_NAME:-pcbuilderbr-nginx}
       internal: {}
 
+  front-end:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    networks:
+      - internal
+
+
   api:
     build:
       context: ./backend
