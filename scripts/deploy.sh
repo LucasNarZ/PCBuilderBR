@@ -1,23 +1,19 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-cd ~/PCBuilderBR
+PROJECT_DIR="${DEPLOY_PATH:-$HOME/PCBuilderBR}"
+COMPOSE_FILE="docker-compose.prod.yml"
 
-git fetch origin
+cd "$PROJECT_DIR"
+
+git fetch origin main
 git reset --hard origin/main
 
-aws ecr get-login-password --region us-east-1 \
-| docker login --username AWS --password-stdin 242201312839.dkr.ecr.us-east-1.amazonaws.com
-
-docker compose -f docker-compose.prod.yml pull
-
-docker compose -f docker-compose.prod.yml down
-
-docker compose -f docker-compose.prod.yml up -d
+docker compose -f "$COMPOSE_FILE" build
+docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
 
 cd backend
 source .venv/bin/activate
 uv sync
 alembic upgrade head
-
 

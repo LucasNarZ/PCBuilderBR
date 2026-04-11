@@ -33,21 +33,6 @@ services:
       - ./backend:/app
       - /app/.venv
 
-  rabbitmq:
-    image: rabbitmq:3-management
-    restart: unless-stopped
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    networks:
-      - internal
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
 
   postgres:
     image: postgres:16.3

@@ -4,88 +4,63 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+permissions:
+  contents: none
 
 jobs:
   deploy:
+    name: Build and deploy on VPS
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: production
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Create .env file
-        run: |
-          echo "${{ secrets.ENV_FILE }}" > .env
-
-      - name: Build images
-        run: |
-          docker compose -f docker-compose.prod.yml build
-
-      - name: Push images to ECR
-        uses: nick-invision/retry@v2
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          retry_wait_seconds: 30
-          command: |
-            docker compose -f docker-compose.prod.yml push
-
-      - name: Setup SSH
+      - name: Setup SSH agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Add server to known_hosts
-        uses: nick-invision/retry@v2
-        with:
-          timeout_minutes: 1
-          max_attempts: 3
-          retry_wait_seconds: 5
-          command: |
-            mkdir -p ~/.ssh
-            ssh-keyscan -H -T 10 46.202.150.9 >> ~/.ssh/known_hosts 2>/dev/null || {
-              echo "ssh-keyscan failed, using fallback..."
-              cat > ~/.ssh/config << 'EOF'
-            Host 46.202.150.9
-                StrictHostKeyChecking no
-                UserKnownHostsFile=/dev/null
-                LogLevel ERROR
-            EOF
-              chmod 600 ~/.ssh/config
-            }
+      - name: Configure known hosts
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
 
-      - name: Set deploy script permissions
-        uses: nick-invision/retry@v2
-        with:
-          timeout_minutes: 2
-          max_attempts: 3
-          retry_wait_seconds: 10
-          command: |
-            ssh -o ConnectTimeout=30 \
-                -o ServerAliveInterval=60 \
-                deploy@46.202.150.9 \
-                'chmod +x ./PCBuilderBR/scripts/deploy.sh'
+      - name: Sync production environment file
+        shell: bash
+        run: |
+          ssh \
+            -o BatchMode=yes \
+            -o ConnectTimeout=30 \
+            -o ServerAliveInterval=60 \
+            -o StrictHostKeyChecking=yes \
+            "${{ vars.DEPLOY_USER }}@${{ vars.DEPLOY_HOST }}" \
+            "mkdir -p '${{ vars.DEPLOY_PATH }}' && umask 077 && cat > '${{ vars.DEPLOY_PATH }}/.env'" <<EOF
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB=${{ vars.POSTGRES_DB }}
+          PROXY_UPSTREAM_NAME=${{ vars.PROXY_UPSTREAM_NAME }}
+          EOF
 
-      - name: Deploy to server
-        uses: nick-invision/retry@v2
+      - name: Deploy on VPS
+        uses: nick-invision/retry@v3
         with:
-          timeout_minutes: 10
+          timeout_minutes: 15
           max_attempts: 3
-          retry_wait_seconds: 30
-          command: |
-            ssh -o ConnectTimeout=30 \
-                -o ServerAliveInterval=60 \
-                deploy@46.202.150.9 \
-                './PCBuilderBR/scripts/deploy.sh'
-
+          retry_wait_seconds: 20
+          command: >-
+            ssh
+            -o BatchMode=yes
+            -o ConnectTimeout=30
+            -o ServerAliveInterval=60
+            -o StrictHostKeyChecking=yes
+            "${{ vars.DEPLOY_USER }}@${{ vars.DEPLOY_HOST }}"
+            "chmod +x '${{ vars.DEPLOY_PATH }}/scripts/deploy.sh' && DEPLOY_PATH='${{ vars.DEPLOY_PATH }}' '${{ vars.DEPLOY_PATH }}/scripts/deploy.sh'"
