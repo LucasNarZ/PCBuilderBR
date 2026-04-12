@@ -20,7 +20,7 @@ export function CatalogModal({ part, onClose }: CatalogModalProps) {
         (async () => {
             try {
                 setLoading(true)
-                const { data } = await apiClient.get<Component[]>("/components", {
+                const { data } = await apiClient.get<Component[]>("/components/", {
                     params: {
                         part_type: part.type, search: searchTerm.trim() || undefined
                     }

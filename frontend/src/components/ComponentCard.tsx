@@ -69,7 +69,7 @@ export function ComponentCard({ component, icon, onClose }: ComponentCardProps) 
     const toggleOffers = async () => {
         if (!offersOpen && offers.length === 0) {
             setLoadingOffers(true);
-            const { data } = await apiClient.get(`/components/${component.name}/offers`);
+            const { data } = await apiClient.get(`/components/${component.name}/offers/`);
             setOffers(data);
             setLoadingOffers(false);
         }
