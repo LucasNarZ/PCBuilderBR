@@ -66,7 +66,7 @@ function App() {
 
     useEffect(() => {
         (async () => {
-            const { data } = await apiClient.post("/compatibility", build)
+            const { data } = await apiClient.post("/compatibility/", build)
             console.log(data)
 
             setCompatibilityErrors([...data.errors, ...data.warnings])
