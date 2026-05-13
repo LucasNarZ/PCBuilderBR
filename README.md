@@ -1,83 +1,85 @@
 # PCBuilderBR
 
-## Funcionalidades Core
+PCBuilderBR is a web application for planning PC builds in Brazil. It helps users choose components, compare prices, and validate whether the selected parts are compatible before buying.
 
-### 1. Seleção de Componentes
-**Categorias obrigatórias:**
-- Processador (CPU)
-- Placa-mãe (Motherboard)
-- Memória RAM
-- Placa de vídeo (GPU)
-- Armazenamento (SSD/HDD)
-- Fonte de alimentação (PSU)
-- Gabinete (Case)
+## Features
 
-**Categorias opcionais:**
-- Cooler (CPU vem com stock cooler)
-- Coolers adicionais (fans)
-- Monitor
-- Periféricos (teclado, mouse, headset)
+- Component selection for CPU, motherboard, RAM, GPU, storage, PSU, case, coolers, monitors, and peripherals.
+- Compatibility checks for sockets, RAM type, GPU clearance, PSU capacity, connectors, and case constraints.
+- Build price summary based on the selected parts.
+- Product and price tracking from major Brazilian retailers.
+- Recommended builds and shareable configurations are planned for future releases.
 
-**Interface de seleção:**
-- Lista filtrada por marca, preço, especificações
-- Cards com imagem, specs principais, preço
-- Busca inteligente (ex: "rtx 4060" ou "ryzen 7600")
-- Ordenação: menor preço, melhor performance, mais popular
-- Badges: "Melhor custo-benefício", "Mais escolhido", "Promoção"
+## Tech Stack
 
-### 2. Validação de Compatibilidade em Tempo Real
+- Frontend: React, Vite, TypeScript, Tailwind CSS, Axios.
+- Backend: FastAPI, Pydantic, SQLAlchemy, Alembic.
+- Database: PostgreSQL.
+- Infrastructure: Docker Compose, Nginx, Grafana, Loki, Promtail, pgAdmin.
 
-**Regras técnicas implementadas:**
+## Running Locally
 
-**CPU ↔ Motherboard:**
-- Socket match (AM5, AM4, LGA1700, LGA1200)
-- Chipset suportado
-- BIOS update warnings (ex: Ryzen 7000 em placa B550)
+### Prerequisites
 
-**RAM ↔ Motherboard:**
-- Tipo DDR (DDR4, DDR5)
-- Velocidade máxima suportada
-- Capacidade máxima (slots disponíveis)
-- Dual/Quad channel otimizado
+- Docker and Docker Compose.
+- Node.js and npm, if you want to use the root helper scripts.
 
-**GPU ↔ Case:**
-- Comprimento máximo suportado
-- Clearance warnings (GPU muito grande para gabinete)
+### Setup
 
-**PSU ↔ Componentes:**
-- TDP total calculado (CPU + GPU + periféricos)
-- Margem de segurança 20-30%
-- Conectores necessários (8-pin, 6-pin para GPU)
-- Certificação recomendada (80+ Bronze mínimo)
+1. Copy the environment example:
 
-**Cooler ↔ Case:**
-- Altura máxima do cooler vs clearance do gabinete
-- Compatibilidade com socket
+```bash
+cp .env.example .env
+```
 
-**Feedback visual:**
-- ✅ Verde: Compatível
-- ⚠️ Amarelo: Atenção (funciona mas não ideal)
-- ❌ Vermelho: Incompatível (bloqueia finalização)
+2. Adjust the values in `.env` if needed.
 
+3. Start the development environment:
 
-### Funcionalidades
-- Opções dos produtos mais vendidos do mercado (MVP)
-- Soma de preços dos produtos escolhidos (MVP)
-- Analise de compatibilidade entre as peças (MVP)
-- Preços dos produtos nas principais lojas, atualizados a cada semana usando as APIs de cada loja(Kabum, Pichau e Amazon) (MVP)
+```bash
+npm run dev:up
+```
 
-- Performance aproximada da config nos jogos mais famosos
-- Links para cada um dos produtos com as melhores ofertas
-- Historico de preços de cada produto em cada loja
-- Compartilhar configs por link 
-- Salvar a config como csv ou JSON
-- Builds prontas recomendadas
-- Calculo de consumo para validar fonte de energia
+4. Follow the logs:
 
-### Worker para atualização de preçofertas
-Todos os dias um worker irá usar as APIs das lojas para pegar os preços novos e atualizar no banco.
-As APIs não são públicas então um estudo sobre os endpoints é necessario.
+```bash
+npm run dev:logs
+```
 
-### Stack
-- Frontend: React, react-hook-form-zod, axios, vite, tailwindCSS
-- Backend: FastAPI, Docker, PostgreSQL, Pydantic, APIs das lojas de eletrônicos
+5. Stop the environment:
+
+```bash
+npm run dev:down
+```
+
+The development compose file exposes PostgreSQL on port `5432`, pgAdmin on port `5050`, and routes the application through Nginx on ports `80` and `443`.
+
+## Useful Scripts
+
+- `npm run dev:up`: starts the development stack.
+- `npm run dev:down`: stops the development stack.
+- `npm run dev:logs`: follows logs from the development stack.
+- `npm run dev:ps`: lists running development services.
+- `npm run prod:up`: starts the production stack.
+
+## Project Structure
+
+```text
+.
+├── backend/      # FastAPI application, database models, migrations, and workers
+├── frontend/     # React and Vite application
+├── infra/        # Observability configuration
+├── docs/         # Architecture documentation
+├── nginx.dev.conf
+├── docker-compose.dev.yml
+└── docker-compose.prod.yml
+```
+
+## Roadmap
+
+- Weekly price updates using retailer APIs or catalog integrations.
+- Price history per product and store.
+- Performance estimates for popular games.
+- Build sharing by public link.
+- Export builds as CSV or JSON.
+- PSU consumption calculation with safety margin recommendations.
